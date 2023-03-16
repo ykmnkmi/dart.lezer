@@ -1,0 +1,7 @@
+@top LibraryDeclaration {
+  NewLine?
+}
+
+@tokens {
+  NewLine { "\n" }
+}

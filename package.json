@@ -1,0 +1,35 @@
+{
+  "name": "@lezer/dart",
+  "version": "0.0.1",
+  "description": "lezer-based Dart grammar",
+  "main": "dist/index.cjs",
+  "type": "module",
+  "exports": {
+    "import": "./dist/index.es.js",
+    "require": "./dist/index.cjs"
+  },
+  "module": "dist/index.es.js",
+  "types": "dist/index.d.ts",
+  "author": "Suleimen Olzhas <ykmnkmi@outlook.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@lezer/generator": "^1.0.0",
+    "@rollup/plugin-node-resolve": "^9.0.0",
+    "mocha": "^9.0.1",
+    "rollup": "^2.52.2"
+  },
+  "dependencies": {
+    "@lezer/lr": "^1.3.0",
+    "@lezer/highlight": "^1.1.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ykmnkmi/dart.lezer.git"
+  },
+  "scripts": {
+    "build": "lezer-generator src/dart.grammar -o src/parser && rollup -c",
+    "build-debug": "lezer-generator src/dart.grammar --names -o src/parser && rollup -c",
+    "prepare": "npm run build",
+    "test": "mocha test/test-*.js"
+  }
+}
