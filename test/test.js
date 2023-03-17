@@ -1,6 +1,6 @@
-import { parser } from './dist/index.es.js'
+import { parser } from '../dist/index.es.js'
 
-let result = parser.parse('')
+let result = parser.parse('true')
 let cursor = result.cursor()
 
 do {

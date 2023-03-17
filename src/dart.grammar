@@ -1,7 +1,16 @@
 @top LibraryDeclaration {
-  NewLine?
+  literal
 }
 
-@tokens {
-  NewLine { "\n" }
+literal[@isGroup=Literal] {
+  NullLiteral |
+  BoolLiteral
+}
+
+NullLiteral {
+  "null"
+}
+
+BoolLiteral {
+  "true" | "false"
 }
