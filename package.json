@@ -1,6 +1,6 @@
 {
   "name": "@lezer/dart",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "lezer-based Dart grammar",
   "main": "dist/index.cjs",
   "type": "module",

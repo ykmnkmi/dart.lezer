@@ -1,16 +1,150 @@
 @top LibraryDeclaration {
+  expression
+}
+
+expression {
   literal
 }
 
 literal[@isGroup=Literal] {
   NullLiteral |
-  BoolLiteral
+  BoolLiteral |
+  NumericLiteral |
+  StringLiteral
 }
 
 NullLiteral {
-  "null"
+  'null'
 }
 
 BoolLiteral {
-  "true" | "false"
+  'true' | 'false'
+}
+
+NumericLiteral {
+  DIGIT+ ('.' DIGIT+)? EXPONENT? |
+  '.' DIGIT+ EXPONENT? |
+  '0x' HEX_DIGIT+ |
+  '0X' HEX_DIGIT+
+}
+
+StringLiteral {
+  SingleLineString+
+}
+
+SingleLineString {
+  RAW_SINGLE_LINE_STRING |
+  SINGLE_LINE_STRING_SQ_BEGIN_END |
+  SINGLE_LINE_STRING_SQ_BEGIN_MID expression (SINGLE_LINE_STRING_SQ_MID_MID expression)* SINGLE_LINE_STRING_SQ_MID_END
+}
+
+@tokens {
+  NEWLINE {
+    '\r' | '\n'| '\r\n'
+  }
+
+  WHITESPACE {
+    ('\t' | ' ' | '\r' | '\n'| '\r\n')+
+  }
+
+  DIGIT {
+    $[0-9]
+  }
+
+  LETTER {
+    $[a-zA-Z]
+  }
+
+  HEX_DIGIT {
+    $[0-9a-fA-F]
+  }
+
+  EXPONENT {
+    $[eE] $[+-]? DIGIT+
+  }
+
+  RAW_SINGLE_LINE_STRING {
+    'r' "'" (!['\r\n])* "'" |
+    'r' '"' (!['\r\n])* '"'
+  }
+
+  ESCAPE_SEQUENCE {
+    '\n' | '\r' | '\f' | '\b' | '\t' | '\v' |
+    '\x' HEX_DIGIT HEX_DIGIT |
+    '\u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT |
+    '\u{' HEX_DIGIT HEX_DIGIT? HEX_DIGIT? HEX_DIGIT? HEX_DIGIT? HEX_DIGIT? '}'
+  }
+
+  STRING_CONTENT_COMMON {
+    ![\\'"$\r\n] |
+    ESCAPE_SEQUENCE |
+    "\\" ![nrbtvxu\r\n] |
+    SIMPLE_STRING_INTERPOLATION
+  }
+
+  SIMPLE_STRING_INTERPOLATION {
+    '$' (IDENTIFIER_NO_DOLLAR | BUILT_IN_IDENTIFIER | 'this')
+  }
+
+  STRING_CONTENT_SQ {
+    STRING_CONTENT_COMMON | '"'
+  }
+
+  SINGLE_LINE_STRING_SQ_BEGIN_END {
+    "'" STRING_CONTENT_SQ* "'"
+  }
+
+  SINGLE_LINE_STRING_SQ_BEGIN_MID {
+    "'" STRING_CONTENT_SQ* '${'
+  }
+
+  SINGLE_LINE_STRING_SQ_MID_MID {
+    '}' STRING_CONTENT_SQ* '${'
+  }
+
+  SINGLE_LINE_STRING_SQ_MID_END {
+    '}' STRING_CONTENT_SQ* "'"
+  }
+
+  IDENTIFIER_NO_DOLLAR {
+    IDENTIFIER_START_NO_DOLLAR IDENTIFIER_PART_NO_DOLLAR*
+  }
+
+  IDENTIFIER_START_NO_DOLLAR {
+    LETTER | '_'
+  }
+
+  IDENTIFIER_PART_NO_DOLLAR {
+    IDENTIFIER_START_NO_DOLLAR | DIGIT
+  }
+
+  BUILT_IN_IDENTIFIER {
+    'abstract' |
+    'as' |
+    'covariant' |
+    'deferred' |
+    'dynamic' |
+    'export' |
+    'external' |
+    'extension' |
+    'factory' |
+    'Function' |
+    'get' |
+    'implements' |
+    'import' |
+    'interface' |
+    'late' |
+    'library' |
+    'mixin' |
+    'operator' |
+    'part' |
+    'required' |
+    'set' |
+    'static' |
+    'typedef'
+  }
+}
+
+@skip {
+  WHITESPACE
 }
