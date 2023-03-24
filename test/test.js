@@ -1,13 +1,19 @@
 import { parser } from '../dist/index.es.js'
 
-let result = parser.parse("'hello ${ null }!'")
-let cursor = result.cursor()
+const input = "'''hello ${ name} !'''"
+
+const result = parser.parse(input)
+const cursor = result.cursor()
 
 do {
-  if (cursor.type.isSkipped) {
-    console.log(`[${cursor.from}, ${cursor.to}]: SKIPPED`)
+  const { from, to, type, name } = cursor
+
+  if (type.isError) {
+    console.log(`[${from}, ${to}]: Error`)
+  } else if (type.isSkipped) {
+    console.log(`[${from}, ${to}]: Skipped`)
   } else {
-    console.log(`[${cursor.from}, ${cursor.to}]: ${cursor.name}`)
+    console.log(`[${from}, ${to}]: ${name} ${JSON.stringify(input.substring(from, to))}`)
   }
 
 } while (cursor.next())

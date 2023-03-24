@@ -29,20 +29,26 @@ NumericLiteral {
 }
 
 StringLiteral {
-  SingleLineString+
+  (SingleLineString | MultiLineString)+
 }
 
 SingleLineString {
   RAW_SINGLE_LINE_STRING |
   SINGLE_LINE_STRING_SQ_BEGIN_END |
-  SINGLE_LINE_STRING_SQ_BEGIN_MID expression (SINGLE_LINE_STRING_SQ_MID_MID expression)* SINGLE_LINE_STRING_SQ_MID_END
+  SINGLE_LINE_STRING_SQ_BEGIN_MID expression (SINGLE_LINE_STRING_SQ_MID_MID expression)* SINGLE_LINE_STRING_SQ_MID_END |
+  SINGLE_LINE_STRING_DQ_BEGIN_END |
+  SINGLE_LINE_STRING_DQ_BEGIN_MID expression (SINGLE_LINE_STRING_DQ_MID_MID expression)* SINGLE_LINE_STRING_DQ_MID_END
+}
+
+MultiLineString {
+  RAW_MULTI_LINE_STRING |
+  MULTI_LINE_STRING_SQ_BEGIN_END |
+  MULTI_LINE_STRING_SQ_BEGIN_MID expression (MULTI_LINE_STRING_SQ_MID_MID expression)* MULTI_LINE_STRING_SQ_MID_END |
+  MULTI_LINE_STRING_DQ_BEGIN_END |
+  MULTI_LINE_STRING_DQ_BEGIN_MID expression (MULTI_LINE_STRING_DQ_MID_MID expression)* MULTI_LINE_STRING_DQ_MID_END
 }
 
 @tokens {
-  NEWLINE {
-    '\r' | '\n'| '\r\n'
-  }
-
   WHITESPACE {
     ('\t' | ' ' | '\r' | '\n'| '\r\n')+
   }
@@ -78,7 +84,7 @@ SingleLineString {
   STRING_CONTENT_COMMON {
     ![\\'"$\r\n] |
     ESCAPE_SEQUENCE |
-    "\\" ![nrbtvxu\r\n] |
+    '\\' ![nrbtvxu\r\n] |
     SIMPLE_STRING_INTERPOLATION
   }
 
@@ -105,6 +111,81 @@ SingleLineString {
   SINGLE_LINE_STRING_SQ_MID_END {
     '}' STRING_CONTENT_SQ* "'"
   }
+
+  STRING_CONTENT_DQ {
+    STRING_CONTENT_COMMON | "'"
+  }
+
+  SINGLE_LINE_STRING_DQ_BEGIN_END {
+    '"' STRING_CONTENT_DQ* '"'
+  }
+
+  SINGLE_LINE_STRING_DQ_BEGIN_MID {
+    '"' STRING_CONTENT_DQ* '${'
+  }
+
+  SINGLE_LINE_STRING_DQ_MID_MID {
+    '}' STRING_CONTENT_DQ* '${'
+  }
+
+  SINGLE_LINE_STRING_DQ_MID_END {
+    '}' STRING_CONTENT_DQ* '"'
+  }
+
+  RAW_MULTI_LINE_STRING {
+    'r' "'''" _* "'''" |
+    'r' '"""' _* '"""'
+  }
+
+  QUOTES_SQ {
+    () | "'" | "''"
+  }
+
+  STRING_CONTENT_TSQ {
+    QUOTES_SQ (STRING_CONTENT_COMMON | '"' | '\r' | '\n')
+  }
+
+  MULTI_LINE_STRING_SQ_BEGIN_END {
+    "'''" STRING_CONTENT_TSQ* "'''"
+  }
+
+  MULTI_LINE_STRING_SQ_BEGIN_MID {
+    "'''" STRING_CONTENT_TSQ* QUOTES_SQ '${'
+  }
+
+  MULTI_LINE_STRING_SQ_MID_MID {
+    '}' STRING_CONTENT_TSQ* QUOTES_SQ '${'
+  }
+
+  MULTI_LINE_STRING_SQ_MID_END {
+    '}' STRING_CONTENT_TSQ* "'''"
+  }
+
+  QUOTES_DQ {
+    () | '"' | '""'
+  }
+
+  STRING_CONTENT_TDQ {
+    QUOTES_DQ (STRING_CONTENT_COMMON | '\'' | '\r' | '\n')
+  }
+
+  MULTI_LINE_STRING_DQ_BEGIN_END {
+    '"""' STRING_CONTENT_TDQ* '"""'
+  }
+
+  MULTI_LINE_STRING_DQ_BEGIN_MID {
+    '"""' STRING_CONTENT_TDQ* QUOTES_DQ '${'
+  }
+
+  MULTI_LINE_STRING_DQ_MID_MID {
+    '}' STRING_CONTENT_TDQ* QUOTES_DQ '${'
+  }
+
+  MULTI_LINE_STRING_DQ_MID_END {
+    '}' STRING_CONTENT_TDQ* '"""'
+  }
+
+  @precedence { RAW_MULTI_LINE_STRING, RAW_SINGLE_LINE_STRING }
 
   IDENTIFIER_NO_DOLLAR {
     IDENTIFIER_START_NO_DOLLAR IDENTIFIER_PART_NO_DOLLAR*
